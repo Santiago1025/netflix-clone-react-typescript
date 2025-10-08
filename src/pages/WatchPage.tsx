@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { anniversaryVideos } from "src/data/anniversaryVideos";
 import { useNavigate } from "react-router-dom";
@@ -22,8 +22,15 @@ import VideoJSPlayer from "src/components/watch/VideoJSPlayer";
 import PlayerSeekbar from "src/components/watch/PlayerSeekbar";
 import PlayerControlButton from "src/components/watch/PlayerControlButton";
 import MainLoadingScreen from "src/components/MainLoadingScreen";
+import NetflixLoadingSpinner from "src/components/NetflixLoadingSpinner";
 
 export function Component() {
+  const [showLoading, setShowLoading] = useState(true);
+  // Mostrar pantalla de carga 3 segundos antes de reproducir el video
+  useEffect(() => {
+    const timeout = setTimeout(() => setShowLoading(false), 3000);
+    return () => clearTimeout(timeout);
+  }, []);
   const playerRef = useRef<Player | null>(null);
   const [playerState, setPlayerState] = useState({
     paused: false,
@@ -110,12 +117,36 @@ export function Component() {
     navigate("/browse");
   };
 
+  const [showControls, setShowControls] = useState(true);
+  const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Oculta los controles después de 10 segundos
+  useEffect(() => {
+    if (showControls) {
+      if (hideTimeout.current) clearTimeout(hideTimeout.current);
+      hideTimeout.current = setTimeout(() => setShowControls(false), 10000);
+    }
+    return () => {
+      if (hideTimeout.current) clearTimeout(hideTimeout.current);
+    };
+  }, [showControls]);
+
+  // Muestra los controles al hacer hover
+  const handleMouseMove = () => {
+    setShowControls(true);
+  };
+
   if (!!videoJsOptions.width) {
+    if (showLoading) {
+      return <NetflixLoadingSpinner />;
+    }
     return (
       <Box
         sx={{
           position: "relative",
         }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setShowControls(false)}
       >
         <VideoJSPlayer options={videoJsOptions} onReady={handlePlayerReady} />
         {playerRef.current && playerInitialized && (
@@ -126,148 +157,157 @@ export function Component() {
               right: 0,
               bottom: 0,
               position: "absolute",
+              pointerEvents: "none", // permite que los eventos pasen al video
             }}
           >
-            <Box px={2} sx={{ position: "absolute", top: 75 }}>
-              <PlayerControlButton onClick={handleGoBack}>
-                <KeyboardBackspaceIcon />
-              </PlayerControlButton>
-            </Box>
-            <Box
-              px={2}
-              sx={{
-                position: "absolute",
-                top: { xs: "40%", sm: "55%", md: "60%" },
-                left: 0,
-              }}
-            >
-              <Typography
-                variant="h3"
-                sx={{
-                  fontWeight: 700,
-                  color: "white",
-                }}
-              >
-                {annivVideo ? annivVideo.title : "Title"}
-              </Typography>
-            </Box>
-            <Box
-              px={{ xs: 0, sm: 1, md: 2 }}
-              sx={{
-                position: "absolute",
-                top: { xs: "50%", sm: "60%", md: "70%" },
-                right: 0,
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  px: 1,
-                  py: 0.5,
-                  fontWeight: 700,
-                  color: "white",
-                  bgcolor: "red",
-                  borderRadius: "12px 0px 0px 12px",
-                }}
-              >
-                12+
-              </Typography>
-            </Box>
-
-            <Box
-              px={{ xs: 1, sm: 2 }}
-              sx={{ position: "absolute", bottom: 20, left: 0, right: 0 }}
-            >
-              {/* Seekbar */}
-              <Stack direction="row" alignItems="center" spacing={1}>
-                <PlayerSeekbar
-                  playedSeconds={playerState.playedSeconds}
-                  duration={playerState.duration}
-                  seekTo={handleSeekTo}
-                />
-              </Stack>
-              {/* end Seekbar */}
-
-              {/* Controller */}
-              <Stack direction="row" alignItems="center">
-                {/* left controller */}
-                <Stack
-                  direction="row"
-                  spacing={{ xs: 0.5, sm: 1.5, md: 2 }}
-                  alignItems="center"
-                >
-                  {!playerState.paused ? (
-                    <PlayerControlButton
-                      onClick={() => {
-                        playerRef.current?.pause();
-                      }}
-                    >
-                      <PauseIcon />
-                    </PlayerControlButton>
-                  ) : (
-                    <PlayerControlButton
-                      onClick={() => {
-                        playerRef.current?.play();
-                      }}
-                    >
-                      <PlayArrowIcon />
-                    </PlayerControlButton>
-                  )}
-                  <PlayerControlButton>
-                    <SkipNextIcon />
+            {/* Título y 12+ sólo si showControls */}
+            {showControls && (
+              <>
+                <Box px={2} sx={{ position: "absolute", top: 75, pointerEvents: "auto" }}>
+                  <PlayerControlButton onClick={handleGoBack}>
+                    <KeyboardBackspaceIcon />
                   </PlayerControlButton>
-                  <VolumeControllers
-                    muted={playerState.muted}
-                    handleVolumeToggle={() => {
-                      playerRef.current?.muted(!playerState.muted);
-                      setPlayerState((draft) => {
-                        return { ...draft, muted: !draft.muted };
-                      });
-                    }}
-                    value={playerState.volume}
-                    handleVolume={handleVolumeChange}
-                  />
-                  <Typography variant="caption" sx={{ color: "white" }}>
-                    {`${formatTime(playerState.playedSeconds)} / ${formatTime(
-                      playerState.duration
-                    )}`}
-                  </Typography>
-                </Stack>
-                {/* end left controller */}
-
-                {/* middle time */}
-                <Box flexGrow={1}>
-                  <MaxLineTypography
-                    maxLine={1}
-                    variant="subtitle1"
-                    textAlign="center"
-                    sx={{ maxWidth: 300, mx: "auto", color: "white" }}
-                  >
-                    {annivVideo ? annivVideo.description : "Description"}
-                  </MaxLineTypography>
                 </Box>
-                {/* end middle time */}
-
-                {/* right controller */}
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  spacing={{ xs: 0.5, sm: 1.5, md: 2 }}
+                <Box
+                  px={2}
+                  sx={{
+                    position: "absolute",
+                    top: { xs: "40%", sm: "55%", md: "60%" },
+                    left: 0,
+                  }}
                 >
-                  <PlayerControlButton>
-                    <SettingsIcon />
-                  </PlayerControlButton>
-                  <PlayerControlButton>
-                    <BrandingWatermarkOutlinedIcon />
-                  </PlayerControlButton>
-                  <PlayerControlButton>
-                    <FullscreenIcon />
-                  </PlayerControlButton>
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      fontWeight: 700,
+                      color: "white",
+                    }}
+                  >
+                    {annivVideo ? annivVideo.title : "Title"}
+                  </Typography>
+                </Box>
+                <Box
+                  px={{ xs: 0, sm: 1, md: 2 }}
+                  sx={{
+                    position: "absolute",
+                    top: { xs: "50%", sm: "60%", md: "70%" },
+                    right: 0,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      px: 1,
+                      py: 0.5,
+                      fontWeight: 700,
+                      color: "white",
+                      bgcolor: "red",
+                      borderRadius: "12px 0px 0px 12px",
+                    }}
+                  >
+                    12+
+                  </Typography>
+                </Box>
+              </>
+            )}
+
+            {/* Barra de reproducción y controles sólo si showControls */}
+            {showControls && (
+              <Box
+                px={{ xs: 1, sm: 2 }}
+                sx={{ position: "absolute", bottom: 20, left: 0, right: 0, pointerEvents: "auto" }}
+              >
+                {/* Seekbar */}
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <PlayerSeekbar
+                    playedSeconds={playerState.playedSeconds}
+                    duration={playerState.duration}
+                    seekTo={handleSeekTo}
+                  />
                 </Stack>
-                {/* end right controller */}
-              </Stack>
-              {/* end Controller */}
-            </Box>
+                {/* end Seekbar */}
+
+                {/* Controller */}
+                <Stack direction="row" alignItems="center">
+                  {/* left controller */}
+                  <Stack
+                    direction="row"
+                    spacing={{ xs: 0.5, sm: 1.5, md: 2 }}
+                    alignItems="center"
+                  >
+                    {!playerState.paused ? (
+                      <PlayerControlButton
+                        onClick={() => {
+                          playerRef.current?.pause();
+                        }}
+                      >
+                        <PauseIcon />
+                      </PlayerControlButton>
+                    ) : (
+                      <PlayerControlButton
+                        onClick={() => {
+                          playerRef.current?.play();
+                        }}
+                      >
+                        <PlayArrowIcon />
+                      </PlayerControlButton>
+                    )}
+                    <PlayerControlButton>
+                      <SkipNextIcon />
+                    </PlayerControlButton>
+                    <VolumeControllers
+                      muted={playerState.muted}
+                      handleVolumeToggle={() => {
+                        playerRef.current?.muted(!playerState.muted);
+                        setPlayerState((draft) => {
+                          return { ...draft, muted: !draft.muted };
+                        });
+                      }}
+                      value={playerState.volume}
+                      handleVolume={handleVolumeChange}
+                    />
+                    <Typography variant="caption" sx={{ color: "white" }}>
+                      {`${formatTime(playerState.playedSeconds)} / ${formatTime(
+                        playerState.duration
+                      )}`}
+                    </Typography>
+                  </Stack>
+                  {/* end left controller */}
+
+                  {/* middle time */}
+                  <Box flexGrow={1}>
+                    <MaxLineTypography
+                      maxLine={1}
+                      variant="subtitle1"
+                      textAlign="center"
+                      sx={{ maxWidth: 300, mx: "auto", color: "white" }}
+                    >
+                      {annivVideo ? annivVideo.description : "Description"}
+                    </MaxLineTypography>
+                  </Box>
+                  {/* end middle time */}
+
+                  {/* right controller */}
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={{ xs: 0.5, sm: 1.5, md: 2 }}
+                  >
+                    <PlayerControlButton>
+                      <SettingsIcon />
+                    </PlayerControlButton>
+                    <PlayerControlButton>
+                      <BrandingWatermarkOutlinedIcon />
+                    </PlayerControlButton>
+                    <PlayerControlButton>
+                      <FullscreenIcon />
+                    </PlayerControlButton>
+                  </Stack>
+                  {/* end right controller */}
+                </Stack>
+                {/* end Controller */}
+              </Box>
+            )}
           </Box>
         )}
       </Box>

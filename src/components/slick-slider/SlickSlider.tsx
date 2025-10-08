@@ -148,13 +148,12 @@ export default function SlickSlider({ data, genre }: SlickSliderProps) {
           >
             <NetflixNavigationLink
               variant="h5"
-              to={`/genre/${
-                genre.id || genre.name.toLowerCase().replace(" ", "_")
-              }`}
+              to="#"
               sx={{
                 display: "inline-block",
                 fontWeight: 700,
               }}
+              onClick={(e) => e.preventDefault()} // <-- Evita la navegación
               onMouseOver={() => {
                 setShowExplore(true);
               }}

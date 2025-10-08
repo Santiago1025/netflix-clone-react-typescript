@@ -12,15 +12,11 @@ export default function PlayButton({ sx, video, ...others }: PlayButtonProps) {
   const navigate = useNavigate();
   const handleClick = () => {
     if (video?.backdrop_path?.startsWith("/anniversary/")) {
-      // Deducimos año leyendo id negativo si sigue nuestro mapeo (-1000 - year)
-      let year: string | undefined;
-      if (video.id < -1000) {
-        const recovered = -1000 - video.id; // 1..n
-        if (recovered > 0 && recovered < 20) year = String(recovered);
-      }
+      // Extraer año del título como en AnniversaryCenterModal
+      const annivId = video.title.match(/Año (\d+)/i)?.[1];
       navigate({
         pathname: `/${MAIN_PATH.watch}`,
-        search: createSearchParams({ anniv: year || "" }).toString(),
+        search: createSearchParams({ anniv: annivId || "" }).toString(),
       });
       return;
     }
