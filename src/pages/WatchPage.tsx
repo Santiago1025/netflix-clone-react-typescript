@@ -1,4 +1,6 @@
 import { useState, useRef, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
+import { anniversaryVideos } from "src/data/anniversaryVideos";
 import { useNavigate } from "react-router-dom";
 import Player from "video.js/dist/types/player";
 import { Box, Stack, Typography } from "@mui/material";
@@ -36,26 +38,31 @@ export function Component() {
   const [playerInitialized, setPlayerInitialized] = useState(false);
 
   const windowSize = useWindowSize();
+  const [searchParams] = useSearchParams();
+  const annivParam = searchParams.get("anniv");
+  const movieIdParam = searchParams.get("movieId");
+  const annivVideo = useMemo(() => {
+    if (!annivParam) return undefined;
+    const year = parseInt(annivParam, 10);
+    if (Number.isNaN(year)) return undefined;
+    return anniversaryVideos.find(v => v.year === year);
+  }, [annivParam]);
   const videoJsOptions = useMemo(() => {
+    const localSrc = annivVideo?.videoSrc;
+    const defaultSrc = "https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8";
     return {
       preload: "metadata",
       autoplay: true,
       controls: false,
-      // responsive: true,
-      // fluid: true,
       width: windowSize.width,
       height: windowSize.height,
       sources: [
-        {
-          // src: videoData?.video,
-          // src: "https://d2zihajmogu5jn.cloudfront.net/bipbop-advanced/bipbop_16x9_variant.m3u8",
-          src: "https://bitmovin-a.akamaihd.net/content/sintel/hls/playlist.m3u8",
-          type: "application/x-mpegurl",
-        },
+        localSrc
+          ? { src: localSrc, type: "video/mp4" }
+          : { src: defaultSrc, type: "application/x-mpegurl" },
       ],
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [windowSize]);
+  }, [windowSize, annivVideo]);
 
   const handlePlayerReady = function (player: Player): void {
     player.on("pause", () => {
@@ -141,7 +148,7 @@ export function Component() {
                   color: "white",
                 }}
               >
-                Title
+                {annivVideo ? annivVideo.title : "Title"}
               </Typography>
             </Box>
             <Box
@@ -236,7 +243,7 @@ export function Component() {
                     textAlign="center"
                     sx={{ maxWidth: 300, mx: "auto", color: "white" }}
                   >
-                    Description
+                    {annivVideo ? annivVideo.description : "Description"}
                   </MaxLineTypography>
                 </Box>
                 {/* end middle time */}

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { createSearchParams } from "react-router-dom";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
@@ -26,6 +27,8 @@ import { MAIN_PATH } from "src/constant";
 interface AnniversaryCenterModalProps {
   video: Movie;
   anchorRect?: DOMRect | null;
+  widthFactor?: number; // factor multiplicador basado en el ancho de la card origen
+  maxWidth?: number; // límite superior de ancho
 }
 
 /**
@@ -33,7 +36,7 @@ interface AnniversaryCenterModalProps {
  * Aparece en el centro de la ventana (fixed) y se cierra al salir con el puntero,
  * presionar Escape o al perder el hover.
  */
-export default function AnniversaryCenterModal({ video, anchorRect }: AnniversaryCenterModalProps) {
+export default function AnniversaryCenterModal({ video, anchorRect, widthFactor = 1.8, maxWidth = 720 }: AnniversaryCenterModalProps) {
   const navigate = useNavigate();
   const setPortal = usePortal();
   const { setDetailType } = useDetailModal();
@@ -56,8 +59,8 @@ export default function AnniversaryCenterModal({ video, anchorRect }: Anniversar
         // Ajuste dinámico según el ancho de la tarjeta original
         // Factor 1.8 para que sea más grande pero no desproporcionado
         width: anchorRect
-          ? Math.min(anchorRect.width * 1.8, 720)
-          : "min(80vw, 720px)",
+          ? Math.min(anchorRect.width * widthFactor, maxWidth)
+          : `min(80vw, ${maxWidth}px)`,
         maxHeight: "90vh",
         display: "flex",
         flexDirection: "column",
@@ -117,7 +120,18 @@ export default function AnniversaryCenterModal({ video, anchorRect }: Anniversar
           <Stack direction="row" spacing={1} alignItems="center">
             <NetflixIconButton
               sx={{ p: 0 }}
-              onClick={() => navigate(`/${MAIN_PATH.watch}`)}
+              onClick={() => {
+                // Detectar si es anniversary para pasar query param local
+                if (isLocal) {
+                  const annivId = video.title.match(/Año (\d+)/i)?.[1];
+                  navigate({
+                    pathname: `/${MAIN_PATH.watch}`,
+                    search: createSearchParams({ anniv: annivId || "" }).toString(),
+                  });
+                  return;
+                }
+                navigate({ pathname: `/${MAIN_PATH.watch}`, search: createSearchParams({ movieId: String(video.id) }).toString() });
+              }}
             >
               <PlayCircleIcon sx={{ width: 44, height: 44 }} />
             </NetflixIconButton>

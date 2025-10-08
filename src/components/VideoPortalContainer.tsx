@@ -2,7 +2,6 @@ import { useRef, useLayoutEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Portal from "@mui/material/Portal";
 
-import VideoCardPortal from "./VideoCardPortal";
 import AnniversaryCenterModal from "./AnniversaryCenterModal";
 import MotionContainer from "./animate/MotionContainer";
 import {
@@ -11,15 +10,17 @@ import {
   varZoomInRight,
 } from "./animate/variants/zoom/ZoomIn";
 import { usePortalData } from "src/providers/PortalProvider";
+import { useDetailModal } from "src/providers/DetailModalProvider";
 
 export default function VideoPortalContainer() {
   const { miniModalMediaData, anchorElement } = usePortalData();
+  const { detail } = useDetailModal();
   const container = useRef<HTMLDivElement | null>(null);
   const portalMeasureRef = useRef<HTMLDivElement | null>(null);
   const [portalH, setPortalH] = useState<number | null>(null);
   const rect = anchorElement?.getBoundingClientRect();
 
-  const hasToRender = !!miniModalMediaData && !!anchorElement;
+  const hasToRender = !!miniModalMediaData && !!anchorElement && !detail.mediaDetail; // si hay modal de detalle abierto, ocultar portal
   let isFirstElement = false;
   let isLastElement = false;
   let variant = varZoomIn;
@@ -70,10 +71,14 @@ export default function VideoPortalContainer() {
   // Solo mostramos el portal si: no es anniversary O si ya tenemos la altura medida
   const shouldShowPortal = hasToRender && (!isAnniversary || portalH !== null);
 
-  // Si es anniversary, renderizamos un modal relativo a la tarjeta pero centrado respecto a ella
-  if (hasToRender && isAnniversary && miniModalMediaData && anchorElement && rect) {
-    const top = rect.top + window.pageYOffset - rect.height * -0; // ligeramente encima del centro
-    const left = rect.left + window.pageXOffset + rect.width * -0.5 ; // centro horizontal
+  // Modal general (reemplaza el anterior) con diferente factor para anniversary
+  if (hasToRender && miniModalMediaData && anchorElement && rect) {
+    const anniversary = isAnniversary;
+    const factor = anniversary ? 1.6 : 1.2;
+    const maxWidth = anniversary ? 720 : 640;
+    const verticalFactor = anniversary ? 0.55 : 0.65;
+    const top = rect.top + window.pageYOffset - rect.height * verticalFactor * -0.001 ;
+    const left = rect.left + window.pageXOffset + rect.width * -0.1;
     return (
       <Portal>
         <motion.div
@@ -86,11 +91,16 @@ export default function VideoPortalContainer() {
             top,
             left,
             transform: "translate(-50%, 0)",
-            zIndex: 1400,
+            zIndex: 1200, // menor que el dialog de detalle
             pointerEvents: "auto",
           }}
         >
-          <AnniversaryCenterModal video={miniModalMediaData} anchorRect={rect} />
+          <AnniversaryCenterModal
+            video={miniModalMediaData}
+            anchorRect={rect}
+            widthFactor={factor}
+            maxWidth={maxWidth}
+          />
         </motion.div>
       </Portal>
     );
@@ -100,10 +110,7 @@ export default function VideoPortalContainer() {
     <>
       {shouldShowPortal && (
         <Portal container={container.current}>
-          <VideoCardPortal
-            video={miniModalMediaData}
-            anchorElement={anchorElement}
-          />
+          {null}
         </Portal>
       )}
       <MotionContainer open={shouldShowPortal} initial="initial">
