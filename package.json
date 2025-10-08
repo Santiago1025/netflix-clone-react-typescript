@@ -26,7 +26,7 @@
     "vite-tsconfig-paths": "^3.5.2"
   },
   "devDependencies": {
-    "@types/react": "^18.0.24",
+    "@types/react": "^18.3.25",
     "@types/react-dom": "^18.0.8",
     "@types/react-slick": "^0.23.10",
     "@vitejs/plugin-react": "^2.2.0",

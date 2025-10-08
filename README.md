@@ -93,3 +93,10 @@ docker run --name netflix-clone-website --rm -d -p 80:80 netflix-clone
 - Replace bundler([Vite](https://vitejs.dev/guide)) with [Turbopack](https://turbo.build/pack/docs/why-turbopack). Turbopack is introduced in Next.js conf recently. It's very fast but it's nor ready to use right now. it just support Next.js, and they plan to support all others as soon as possible. so if it's ready to use, replace [Vite](https://vitejs.dev/guide) with [Turbopack](https://turbo.build/pack/docs/why-turbopack).
 - Add accessibilities for better UX.
 - Add Tests.
+
+Construir imagen:
+docker build --build-arg TMDB_V3_API_KEY=31b109dbcc6aeebad130aa4e07cb0856 -t netflix-clone .
+
+
+Correr:
+docker run -p 8080:80 netflix-clone

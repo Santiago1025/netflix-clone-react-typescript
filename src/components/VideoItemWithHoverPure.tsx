@@ -4,10 +4,12 @@ type VideoItemWithHoverPureType = {
   src: string;
   innerRef: ForwardedRef<HTMLDivElement>;
   handleHover: (value: boolean) => void;
+  aspectRatio?: string; // Nuevo
 };
 
 class VideoItemWithHoverPure extends PureComponent<VideoItemWithHoverPureType> {
   render() {
+    const { aspectRatio = "calc(9 / 16 * 100%)" } = this.props;
     return (
       <div
         ref={this.props.innerRef}
@@ -17,26 +19,26 @@ class VideoItemWithHoverPure extends PureComponent<VideoItemWithHoverPureType> {
           borderRadius: 0.5,
           width: "100%",
           position: "relative",
-          paddingTop: "calc(9 / 16 * 100%)",
+          // Usa aspectRatio si es string tipo "2 / 3", si no usa paddingTop
+          ...(aspectRatio.includes("/") 
+            ? { aspectRatio }
+            : { paddingTop: aspectRatio }),
         }}
       >
         <img
           src={this.props.src}
+          alt={this.props.src}
           style={{
             top: 0,
             height: "100%",
             objectFit: "cover",
             position: "absolute",
             borderRadius: "4px",
+            width: "100%",
+            display: "block",
           }}
-          onPointerEnter={() => {
-            // console.log("onPointerEnter");
-            this.props.handleHover(true);
-          }}
-          onPointerLeave={() => {
-            // console.log("onPointerLeave");
-            this.props.handleHover(false);
-          }}
+          onPointerEnter={() => this.props.handleHover(true)}
+          onPointerLeave={() => this.props.handleHover(false)}
         />
       </div>
     );

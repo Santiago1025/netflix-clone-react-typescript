@@ -56,7 +56,7 @@ interface SlideItemProps {
 function SlideItem({ item }: SlideItemProps) {
   return (
     <Box sx={{ pr: { xs: 0.5, sm: 1 } }}>
-      <VideoItemWithHover video={item} />
+      <VideoItemWithHover video={item} aspectRatio="16 / 9" />
     </Box>
   );
 }

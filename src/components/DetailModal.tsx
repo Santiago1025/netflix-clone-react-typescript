@@ -27,6 +27,7 @@ import { useDetailModal } from "src/providers/DetailModalProvider";
 import { useGetSimilarVideosQuery } from "src/store/slices/discover";
 import { MEDIA_TYPE } from "src/types/Common";
 import VideoJSPlayer from "./watch/VideoJSPlayer";
+import { getAnniversaryByMovieId, mapAnniversaryToMovieDetail } from "src/data/anniversaryVideos";
 
 const Transition = forwardRef(function Transition(
   props: TransitionProps & {
@@ -58,7 +59,17 @@ export default function DetailModal() {
     }
   }, []);
 
+  let isLocal = false;
+  let localSrc: string | undefined;
   if (detail.mediaDetail) {
+    // Detección: ids negativos en nuestro rango custom y videos.site === 'local' o key vacío
+    if (
+      detail.mediaDetail.id < 0 &&
+      (detail.mediaDetail as any)?.videos?.results?.[0]?.site === "local"
+    ) {
+      isLocal = true;
+      localSrc = (detail.mediaDetail as any).__localVideoSrc;
+    }
     return (
       <Dialog
         fullWidth
@@ -86,23 +97,39 @@ export default function DetailModal() {
               }}
             >
               <VideoJSPlayer
-                options={{
-                  loop: true,
-                  autoplay: true,
-                  controls: false,
-                  responsive: true,
-                  fluid: true,
-                  techOrder: ["youtube"],
-                  sources: [
-                    {
-                      type: "video/youtube",
-                      src: `https://www.youtube.com/watch?v=${
-                        detail.mediaDetail?.videos.results[0]?.key ||
-                        "L3oOldViIgY"
-                      }`,
-                    },
-                  ],
-                }}
+                options={
+                  isLocal
+                    ? {
+                        loop: true,
+                        autoplay: true,
+                        controls: false,
+                        responsive: true,
+                        fluid: true,
+                        sources: [
+                          {
+                            type: "video/mp4",
+                            src: localSrc || "",
+                          },
+                        ],
+                      }
+                    : {
+                        loop: true,
+                        autoplay: true,
+                        controls: false,
+                        responsive: true,
+                        fluid: true,
+                        techOrder: ["youtube"],
+                        sources: [
+                          {
+                            type: "video/youtube",
+                            src: `https://www.youtube.com/watch?v=${
+                              detail.mediaDetail?.videos.results[0]?.key ||
+                              "L3oOldViIgY"
+                            }`,
+                          },
+                        ],
+                      }
+                }
                 onReady={handleReady}
               />
 
