@@ -12,7 +12,7 @@ export const anniversaryVideos: AnniversaryVideo[] = [
     description: 'Descripción emotiva del primer año...',
     poster: '/anniversary/primer-ano.jpg',
     backdrop: '/anniversary/primer-ano.jpg',
-    videoSrc: '/anniversary/primero.mp4',
+    videoSrc: '/anniversary/preview1.mp4',
     durationMinutes: 4,
     tags: ['Inicio', 'Recuerdos'],
     createdAt: '2019-10-05'
@@ -25,6 +25,7 @@ export const anniversaryVideos: AnniversaryVideo[] = [
     poster: '/anniversary/segundo-ano.jpg',
     backdrop: '/anniversary/segundo-ano.jpg',
     videoSrc: '/anniversary/segundo.mp4',
+    previewSrc: '/anniversary/preview2.mp4',
     durationMinutes: 5,
     tags: ['Crecimiento'],
     createdAt: '2020-10-05'
@@ -37,6 +38,7 @@ export const anniversaryVideos: AnniversaryVideo[] = [
     poster: '/anniversary/tercer-ano.jpg',
     backdrop: '/anniversary/tercer-ano.jpg',
     videoSrc: '/anniversary/tercero.mp4',
+    previewSrc: '/anniversary/preview3.mp4',
     durationMinutes: 6,
     tags: ['Horizontes'],
     createdAt: '2021-10-05'
@@ -49,6 +51,7 @@ export const anniversaryVideos: AnniversaryVideo[] = [
     poster: '/anniversary/cuarto-ano.jpg',
     backdrop: '/anniversary/cuarto-ano.jpg',
     videoSrc: '/anniversary/cuarto.mp4',
+    previewSrc: '/anniversary/preview4.mp4',
     durationMinutes: 7,
     tags: ['Fortaleza'],
     createdAt: '2022-10-05'
@@ -61,6 +64,7 @@ export const anniversaryVideos: AnniversaryVideo[] = [
     poster: '/anniversary/quinto-ano.jpg',
     backdrop: '/anniversary/quinto-ano.jpg',
     videoSrc: '/anniversary/quinto.mp4',
+    previewSrc: '/anniversary/preview5.mp4',
     durationMinutes: 8,
     tags: ['Celebración'],
     createdAt: '2023-10-05'
@@ -73,6 +77,7 @@ export const anniversaryVideos: AnniversaryVideo[] = [
     poster: '/anniversary/sexto-ano.jpg',
     backdrop: '/anniversary/sexto-ano.jpg',
     videoSrc: '/anniversary/sexto.mp4',
+    previewSrc: '/anniversary/preview6.mp4',
     durationMinutes: 9,
     tags: ['Presente'],
     createdAt: '2024-10-05'

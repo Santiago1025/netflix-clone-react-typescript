@@ -17,11 +17,34 @@ export async function loader() {
 export function Component() {
   const { data: genres, isSuccess } = useGetGenresQuery(MEDIA_TYPE.Movie);
 
+  if (isSuccess && genres) {
+    // Mostrar el orden original de los géneros de la API
+    // Solo nombres para mayor claridad
+    // eslint-disable-next-line no-console
+    console.log('Orden original de géneros de la API:', genres.map(g => g.name));
+  }
+
   if (isSuccess && genres && genres.length > 0) {
+    // Creamos una copia de los géneros de la API para manipular
+    const genresCopy = [...genres];
+    // Buscamos el índice de 'Animation' y lo extraemos
+    const animationIdx = genresCopy.findIndex(g => g.name === 'Animation');
+    let animationGenre = null;
+    if (animationIdx !== -1) {
+      animationGenre = genresCopy.splice(animationIdx, 1)[0];
+    }
+    // Buscamos el índice de 'Now Playing' en COMMON_TITLES
+    const nowPlayingIdx = COMMON_TITLES.findIndex(t => t.name === 'Now Playing');
+    // Armamos el array combinado
+    let combinedGenres = [...COMMON_TITLES, ...genresCopy];
+    // Reemplazamos 'Now Playing' por 'Animation' si ambos existen
+    if (nowPlayingIdx !== -1 && animationGenre) {
+      combinedGenres[nowPlayingIdx] = animationGenre;
+    }
     return (
       <Stack spacing={2}>
         <HeroSection mediaType={MEDIA_TYPE.Movie} />
-        {[...COMMON_TITLES, ...genres].map((genre: Genre | CustomGenre, index) => {
+        {combinedGenres.map((genre: Genre | CustomGenre, index) => {
           const element = (
             <SliderRowForGenre
               key={genre.id || genre.name}

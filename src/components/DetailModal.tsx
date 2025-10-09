@@ -68,7 +68,13 @@ export default function DetailModal() {
       (detail.mediaDetail as any)?.videos?.results?.[0]?.site === "local"
     ) {
       isLocal = true;
-      localSrc = (detail.mediaDetail as any).__localVideoSrc;
+      // Si es aniversario año 1-6 y tiene previewSrc, usarlo para el preview
+      const anniv = getAnniversaryByMovieId(detail.mediaDetail.id);
+      if (anniv && anniv.previewSrc) {
+        localSrc = anniv.previewSrc;
+      } else {
+        localSrc = (detail.mediaDetail as any).__localVideoSrc;
+      }
     }
     return (
       <Dialog
