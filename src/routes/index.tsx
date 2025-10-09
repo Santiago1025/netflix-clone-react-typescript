@@ -5,13 +5,13 @@ import MainLayout from "src/layouts/MainLayout";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: MAIN_PATH.root,
+    lazy: () => import("src/pages/LandingPage"),
+  },
+  {
+    path: "/app",
     element: <MainLayout />,
     children: [
-      {
-        path: MAIN_PATH.root,
-        element: <Navigate to={`/${MAIN_PATH.browse}`} />,
-      },
       {
         path: MAIN_PATH.browse,
         lazy: () => import("src/pages/HomePage"),

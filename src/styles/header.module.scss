@@ -1,0 +1,106 @@
+@use "./_mixins" as *;
+@use "./_variables" as *;
+@use "./_utils" as *;
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  z-index: 2;
+  width: 100%;
+
+  font-size: var(--font-size--1);
+  padding: 1rem;
+  margin: 0 auto;
+  transition: background-color 200ms ease;
+  background: linear-gradient(
+    to bottom,
+    hsla(var(--color-background-values), 0.7),
+    transparent
+  );
+
+  @include for("tablet-up") {
+    left: 0;
+    right: 0;
+    padding: 2vh 4vw;
+  }
+}
+
+.nav-left {
+  display: flex;
+  gap: 2em;
+  margin-right: auto;
+
+  &__list {
+    display: inline-flex;
+    gap: 1.5em;
+
+    a {
+      text-decoration: none;
+      color: inherit;
+
+      &:global(.active) {
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.nav-right {
+  display: flex;
+}
+
+.nf-logo {
+  margin-right: auto;
+
+  img {
+    width: clamp(5rem, 5vw, 10rem);
+  }
+}
+
+.lang-selector {
+  position: relative;
+  margin-right: 1rem;
+  border: 1px solid var(--color-secondary);
+  border-radius: $border-radius-1;
+
+  &::before {
+    position: absolute;
+    top: 55%;
+    left: 5%;
+    transform: translateY(-50%);
+    content: url(/language.svg);
+    width: var(--font-size--1);
+  }
+
+  select {
+    border: none;
+    background-color: transparent;
+    padding: 0.2rem 0.5rem 0.2rem 1.25rem;
+    color: var(--color-primary);
+  }
+
+  @include for("tablet-up") {
+    display: inline-block;
+  }
+}
+
+.sign-in-btn {
+  border: none;
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+  padding: 0.4rem 1rem;
+  border-radius: $border-radius-1;
+  cursor: pointer;
+  font-weight: 600;
+
+  &:hover {
+    background-color: hsl(357, 92%, 52%);
+  }
+}
+
+.header-blur {
+  background-color: hsla(var(--color-background-values), 0.85);
+}
